@@ -5,3 +5,70 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  image       String?
+  exploreInfo String?
+  products    Product[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String @unique
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  imageUrl    String?
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  brandId    Int
+  brand      Brand @relation(fields: [brandId], references: [id])
+
+  orderItems OrderItem[]
+}
+
+model Brand {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  firstName    String
+  email        String   @unique
+  passwordHash String
+  address      String?
+  createdAt    DateTime @default(now())
+
+  orders Order[]
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  status      String
+  totalAmount Decimal @db.Decimal(10, 2)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id              Int     @id @default(autoincrement())
+  quantity        Int
+  priceAtPurchase Decimal @db.Decimal(10, 2)
+
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id])
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+}
