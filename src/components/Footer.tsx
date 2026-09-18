@@ -2,7 +2,7 @@ import PaymentIcons from "@/components/icons/PaymentIcons";
 
 export default function Footer() {
     return (
-        <footer className="w-full bg-[#222327] text-white">
+        <footer className="w-full overflow-hidden bg-[#222327] text-white">
             <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-4 py-16 md:px-[60px] md:py-[140px] lg:grid-cols-[531.75px_1fr]">
 
                 {/* Lewa część */}
