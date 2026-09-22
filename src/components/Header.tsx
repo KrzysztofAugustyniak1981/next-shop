@@ -1,9 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import CartIcon from "./icons/CartIcon";
+import { useCart } from "@/context/CartContext";
 
 
 export default function Header() {
+    const { cartItems } = useCart();
+
+    const cartCount = cartItems.reduce(
+        (total, item) => total + item.quantity,
+        0
+    );
+
     return (
         <header className="w-full bg-[#1A1A1A] text-white">
             <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-6 md:gap-10 md:px-10 md:py-8">
@@ -16,9 +26,19 @@ export default function Header() {
                     </Link>
 
                     <div className="flex items-center gap-6">
-                        <button type="button" aria-label="Cart" className="cursor-pointer">
+                        <Link
+                            href="/cart"
+                            aria-label="Cart"
+                            className="relative"
+                        >
                             <CartIcon />
-                        </button>
+
+                            {cartCount > 0 && (
+                                <span className="absolute -right-3 -top-3 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-xs font-bold text-white">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
 
                         <Link href="/profile" aria-label="Profile">
                             <Image

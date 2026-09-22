@@ -68,6 +68,7 @@ export default async function RecommendationSection() {
                 {sortedProducts.map((product) => (
                     <ProductCard
                         key={product.id}
+                        id={product.id}
                         name={product.name}
                         category={product.category.name}
                         price={product.price.toString()}
