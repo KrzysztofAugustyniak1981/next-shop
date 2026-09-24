@@ -28,7 +28,10 @@ export default function ProductCard({
                     <CartIcon />
                 </div>
 
-                <Link href={`/products/${id}`}>
+                <Link
+                    href={`/products/${id}`}
+                    className="relative block h-full w-full"
+                >
                     <Image
                         src={imageUrl || "/images/product-mouse.png"}
                         alt={name}

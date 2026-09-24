@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import CartIcon from "./icons/CartIcon";
 import { useCart } from "@/context/CartContext";
-
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
     const { cartItems } = useCart();
+    const { user } = useAuth();
 
     const cartCount = cartItems.reduce(
         (total, item) => total + item.quantity,
@@ -18,7 +19,7 @@ export default function Header() {
         <header className="w-full bg-[#1A1A1A] text-white">
             <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-6 md:gap-10 md:px-10 md:py-8">
 
-                {/* Górny rząd */}
+                {/* Top row */}
                 <div className="flex h-11 items-center justify-between">
                     <Link href="/" className="text-xl font-bold">
                         <span className="text-orange-500">Devstock</span>
@@ -40,7 +41,10 @@ export default function Header() {
                             )}
                         </Link>
 
-                        <Link href="/profile" aria-label="Profile">
+                        <Link
+                            href={user ? "/profile" : "/login"}
+                            aria-label="Profile"
+                        >
                             <Image
                                 src="/images/avatar.svg"
                                 alt="Profile"
@@ -52,9 +56,12 @@ export default function Header() {
                     </div>
                 </div>
 
-                {/* Nawigacja */}
+                {/* Navigation */}
                 <nav className="flex items-center gap-10 border-b border-[#2A2A2A] pb-8">
-                    <Link href="/" className="text-sm text-orange-500">
+                    <Link
+                        href="/"
+                        className="text-sm text-orange-500"
+                    >
                         Home
                     </Link>
 

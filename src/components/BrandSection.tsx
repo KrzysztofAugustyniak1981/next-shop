@@ -1,4 +1,5 @@
 import BrandCard from "@/components/BrandCard";
+import Link from "next/link";
 
 export default function BrandSection() {
     return (
@@ -8,12 +9,12 @@ export default function BrandSection() {
                     Brand
                 </h2>
 
-                <a
+                <Link
                     href="/products"
                     className="text-sm text-orange-500 hover:text-orange-400"
                 >
                     See All →
-                </a>
+                </Link>
             </div>
 
             <div className="scrollbar-hide flex gap-8 overflow-x-auto overflow-y-hidden md:overflow-x-hidden">

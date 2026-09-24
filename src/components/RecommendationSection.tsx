@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 
 const adapter = new PrismaPg({
@@ -9,8 +10,8 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 export default async function RecommendationSection() {
-    // Pobieramy z bazy produkty, które mają być pokazane
-    // w sekcji Recommendation zgodnie z Figmą.
+    // Fetch products that should be displayed
+    // in the Recommendation section according to Figma.
     const products = await prisma.product.findMany({
         where: {
             name: {
@@ -29,7 +30,7 @@ export default async function RecommendationSection() {
         },
     });
 
-    // Kolejność produktów zgodna z Figmą.
+    // Product order according to Figma.
     const recommendationOrder = [
         "Logitech G502 Hero",
         "Sony WH-CH510",
@@ -39,8 +40,8 @@ export default async function RecommendationSection() {
         "JBL Tune 500",
     ];
 
-    // findMany() nie gwarantuje kolejności z tablicy "in",
-    // dlatego ustawiamy ją tutaj.
+    // findMany() does not guarantee the order from the "in" array,
+    // so we set the correct order here.
     const sortedProducts = recommendationOrder
         .map((name) =>
             products.find((product) => product.name === name)
@@ -49,21 +50,21 @@ export default async function RecommendationSection() {
 
     return (
         <section className="w-full">
-            {/* Nagłówek sekcji */}
+            {/* Section header */}
             <div className="mb-8 flex items-center justify-between">
                 <h2 className="text-2xl font-medium text-white">
                     Recommendation
                 </h2>
 
-                <a
+                <Link
                     href="/products"
                     className="text-sm text-orange-500 hover:text-orange-400"
                 >
                     See All →
-                </a>
+                </Link>
             </div>
 
-            {/* Karty produktów */}
+            {/* Product cards */}
             <div className="flex gap-8 overflow-x-auto overflow-y-hidden">
                 {sortedProducts.map((product) => (
                     <ProductCard
