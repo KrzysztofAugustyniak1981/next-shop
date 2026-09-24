@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import Link from "next/link";
 
 export default function CartPage() {
     const {
@@ -148,6 +149,12 @@ export default function CartPage() {
                             >
                                 Clear Cart
                             </button>
+                            <Link
+                                href="/checkout"
+                                className="mt-4 block w-full rounded-[6px] bg-[#F29145] px-6 py-4 text-center text-sm font-semibold text-[#1A1A1A]"
+                            >
+                                Proceed to Checkout
+                            </Link>
                         </div>
                     )}
                 </div>
