@@ -80,17 +80,6 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    if (!items || items.length === 0) {
-        return NextResponse.json(
-            {
-                message: "Cart is empty",
-            },
-            {
-                status: 400,
-            }
-        );
-    }
-
     const productIds = items.map((item) => item.productId);
 
     const products = await prisma.product.findMany({
