@@ -45,6 +45,10 @@ model User {
   email        String   @unique
   passwordHash String
   address      String?
+  country      String?
+  province     String?
+  city         String?
+  postalCode   String?
   createdAt    DateTime @default(now())
 
   orders Order[]
@@ -55,6 +59,7 @@ model Order {
   createdAt   DateTime @default(now())
   status      String
   totalAmount Decimal @db.Decimal(10, 2)
+  productProtection Boolean @default(false)
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
