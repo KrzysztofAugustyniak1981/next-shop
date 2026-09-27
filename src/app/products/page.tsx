@@ -128,6 +128,7 @@ export default async function ProductsPage({
                                 price={product.price.toString()}
                                 oldPrice={product.oldPrice?.toString()}
                                 imageUrl={product.imageUrl}
+                                stock={product.stock}
                             />
                         ))}
                     </div>

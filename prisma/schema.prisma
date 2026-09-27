@@ -17,9 +17,9 @@ model Category {
 
 model Product {
   id          Int      @id @default(autoincrement())
-  name        String @unique
+  name        String   @unique
   description String?
-  price       Decimal @db.Decimal(10, 2)
+  price       Decimal  @db.Decimal(10, 2)
   oldPrice    Decimal? @db.Decimal(10, 2)
   stock       Int      @default(0)
   imageUrl    String?
@@ -27,10 +27,11 @@ model Product {
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])
 
-  brandId    Int
-  brand      Brand @relation(fields: [brandId], references: [id])
+  brandId Int
+  brand   Brand @relation(fields: [brandId], references: [id])
 
   orderItems OrderItem[]
+  cartItems  CartItem[]
 }
 
 model Brand {
@@ -52,14 +53,39 @@ model User {
   createdAt    DateTime @default(now())
 
   orders Order[]
+  cart   Cart?
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items CartItem[]
+}
+
+model CartItem {
+  id       Int @id @default(autoincrement())
+  quantity Int @default(1)
+
+  cartId Int
+  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  status      String
-  totalAmount Decimal @db.Decimal(10, 2)
-  productProtection Boolean @default(false)
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  status            String
+  totalAmount       Decimal  @db.Decimal(10, 2)
+  productProtection Boolean  @default(false)
 
   userId Int
   user   User @relation(fields: [userId], references: [id])

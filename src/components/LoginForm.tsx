@@ -1,47 +1,79 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+type LoginFormData = {
+    email: string;
+    password: string;
+    savePassword: boolean;
+};
+
 export default function LoginForm() {
     const [step, setStep] = useState<1 | 2>(1);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState("");
+    const [serverError, setServerError] = useState("");
+
     const { login } = useAuth();
     const router = useRouter();
 
+    const {
+        register,
+        handleSubmit,
+        trigger,
+        formState: { errors, isSubmitting },
+    } = useForm<LoginFormData>({
+        defaultValues: {
+            email: "",
+            password: "",
+            savePassword: true,
+        },
+    });
 
-    async function handleLogin() {
-        setError("");
+    async function handleContinue() {
+        const emailIsValid = await trigger("email");
 
-        const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email,
-                password,
-            }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            setError(data.message);
-            return;
+        if (emailIsValid) {
+            setStep(2);
         }
+    }
 
-        login({
-            id: data.userId,
-            email: data.email,
-        });
+    async function onSubmit(data: LoginFormData) {
+        setServerError("");
 
-        router.push("/profile");
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: data.email,
+                    password: data.password,
+                }),
+            });
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                setServerError(
+                    responseData.message || "Invalid email or password."
+                );
+                return;
+            }
+
+            login({
+                id: responseData.userId,
+                email: responseData.email,
+            });
+
+            router.push("/");
+        } catch {
+            setServerError("Something went wrong. Please try again.");
+        }
     }
 
     return (
@@ -51,7 +83,10 @@ export default function LoginForm() {
                 <span className="text-white">Hub</span>
             </div>
 
-            <div className="mt-8 rounded-[6px] border border-[#383B42] bg-[#262626] p-6">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="mt-8 rounded-[6px] border border-[#383B42] bg-[#262626] p-6"
+            >
                 <h1 className="border-b border-[#383B42] pb-6 text-xl text-white">
                     Sign in
                 </h1>
@@ -69,16 +104,27 @@ export default function LoginForm() {
                             <input
                                 id="email"
                                 type="text"
-                                value={email}
-                                onChange={(event) => setEmail(event.target.value)}
                                 placeholder="Email or Mobile phone Number"
+                                {...register("email", {
+                                    required: "Email is required.",
+                                    pattern: {
+                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                        message: "Enter a valid email address.",
+                                    },
+                                })}
                                 className="h-[54px] w-full rounded-[6px] border border-[#616674] bg-[#262626] px-5 text-sm text-white outline-none placeholder:text-[#9CA0AA] focus:border-[#F29145]"
                             />
+
+                            {errors.email && (
+                                <p className="mt-2 text-sm text-red-400">
+                                    {errors.email.message}
+                                </p>
+                            )}
                         </div>
 
                         <button
                             type="button"
-                            onClick={() => setStep(2)}
+                            onClick={handleContinue}
                             className="mt-8 h-[54px] w-full rounded-[6px] bg-[#F29145] text-sm text-[#1A1A1A]"
                         >
                             Continue
@@ -110,18 +156,17 @@ export default function LoginForm() {
                                 <input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
-                                    value={password}
-                                    onChange={(event) =>
-                                        setPassword(event.target.value)
-                                    }
                                     placeholder="Password"
+                                    {...register("password", {
+                                        required: "Password is required.",
+                                    })}
                                     className="h-[54px] w-full rounded-[6px] border border-[#616674] bg-[#262626] px-5 pr-12 text-sm text-white outline-none placeholder:text-[#9CA0AA] focus:border-[#F29145]"
                                 />
 
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        setShowPassword(!showPassword)
+                                        setShowPassword((current) => !current)
                                     }
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA0AA] hover:text-white"
                                     aria-label={
@@ -133,13 +178,19 @@ export default function LoginForm() {
                                     ◉
                                 </button>
                             </div>
+
+                            {errors.password && (
+                                <p className="mt-2 text-sm text-red-400">
+                                    {errors.password.message}
+                                </p>
+                            )}
                         </div>
 
                         <div className="mt-4 flex items-center justify-between">
                             <label className="flex items-center gap-2 text-xs text-white">
                                 <input
                                     type="checkbox"
-                                    defaultChecked
+                                    {...register("savePassword")}
                                     className="h-4 w-4 accent-[#F29145]"
                                 />
                                 Save password
@@ -154,21 +205,21 @@ export default function LoginForm() {
                         </div>
 
                         <button
-                            type="button"
-                            onClick={handleLogin}
-                            className="mt-8 h-[54px] w-full rounded-[6px] bg-[#F29145] text-sm text-[#1A1A1A]"
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="mt-8 h-[54px] w-full rounded-[6px] bg-[#F29145] text-sm text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Sign In
+                            {isSubmitting ? "Signing in..." : "Sign In"}
                         </button>
 
-                        {error && (
+                        {serverError && (
                             <p className="mt-4 text-sm text-red-400">
-                                {error}
+                                {serverError}
                             </p>
                         )}
                     </>
                 )}
-            </div>
+            </form>
         </div>
     );
 }

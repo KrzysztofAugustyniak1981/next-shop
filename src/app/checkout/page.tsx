@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import HeartIcon from "@/components/icons/HeartIcon";
 
 type UserAddress = {
     firstName: string;
@@ -156,20 +158,39 @@ export default function CheckoutPage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#1A1A1A] text-white">
+        <main className="bg-[#1A1A1A] text-white">
             <div className="mx-auto max-w-[1440px] px-4 py-10 md:px-10">
-                <div className="mb-10 flex items-center gap-3 text-xs text-gray-400">
-                    <span>Home</span>
+
+                <nav
+                    aria-label="Breadcrumb"
+                    className="mb-10 flex items-center gap-3 text-xs text-gray-400"
+                >
+                    <Link
+                        href="/"
+                        className="transition-colors hover:text-[#F29145]"
+                    >
+                        Home
+                    </Link>
+
                     <span>›</span>
-                    <span>Product</span>
+
+                    <Link
+                        href="/products"
+                        className="transition-colors hover:text-[#F29145]"
+                    >
+                        Product
+                    </Link>
+
                     <span>›</span>
+
                     <span className="text-white">
                         Checkout
                     </span>
-                </div>
+                </nav>
 
                 <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
                     <div className="flex min-w-0 flex-1 flex-col gap-10">
+
                         <section>
                             <h1 className="mb-4 text-lg font-medium">
                                 Your Order
@@ -182,6 +203,7 @@ export default function CheckoutPage() {
                                         className="border-b border-[#383B42] p-6"
                                     >
                                         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+
                                             <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-[4px] bg-white">
                                                 <Image
                                                     src={
@@ -300,6 +322,7 @@ export default function CheckoutPage() {
                             </h2>
 
                             <div className="rounded-[6px] border border-[#383B42] bg-[#262626] p-6">
+
                                 <div className="grid grid-cols-2 border-b border-[#383B42]">
                                     <button
                                         type="button"
@@ -326,8 +349,7 @@ export default function CheckoutPage() {
                                             )
                                         }
                                         className={`pb-4 text-sm ${
-                                            addressMode ===
-                                            "new"
+                                            addressMode === "new"
                                                 ? "border-b border-[#F29145] text-[#F29145]"
                                                 : "text-gray-400"
                                         }`}
@@ -410,9 +432,9 @@ export default function CheckoutPage() {
                                         ) : (
                                             <div>
                                                 <p className="text-sm text-gray-400">
-                                                    You do not
-                                                    have a saved
-                                                    address yet.
+                                                    You do not have
+                                                    a saved address
+                                                    yet.
                                                 </p>
 
                                                 <button
@@ -434,15 +456,12 @@ export default function CheckoutPage() {
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <input
                                                 type="text"
-                                                value={
-                                                    country
-                                                }
+                                                value={country}
                                                 onChange={(
                                                     event
                                                 ) =>
                                                     setCountry(
-                                                        event
-                                                            .target
+                                                        event.target
                                                             .value
                                                     )
                                                 }
@@ -459,8 +478,7 @@ export default function CheckoutPage() {
                                                     event
                                                 ) =>
                                                     setProvince(
-                                                        event
-                                                            .target
+                                                        event.target
                                                             .value
                                                     )
                                                 }
@@ -475,8 +493,7 @@ export default function CheckoutPage() {
                                                     event
                                                 ) =>
                                                     setCity(
-                                                        event
-                                                            .target
+                                                        event.target
                                                             .value
                                                     )
                                                 }
@@ -493,8 +510,7 @@ export default function CheckoutPage() {
                                                     event
                                                 ) =>
                                                     setPostalCode(
-                                                        event
-                                                            .target
+                                                        event.target
                                                             .value
                                                     )
                                                 }
@@ -545,7 +561,7 @@ export default function CheckoutPage() {
 
                             <div className="flex min-h-[76px] items-center rounded-[6px] border border-[#383B42] bg-[#262626] px-6">
                                 <span className="mr-4 text-green-400">
-                                    ♡
+                                    <HeartIcon className="h-5 w-5" />
                                 </span>
 
                                 <span className="text-sm">

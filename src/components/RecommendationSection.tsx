@@ -9,20 +9,26 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
+type RandomProduct = {
+    id: number;
+};
+
 export default async function RecommendationSection() {
-    // Fetch products that should be displayed
-    // in the Recommendation section according to Figma.
+    const randomProducts = await prisma.$queryRaw<RandomProduct[]>`
+        SELECT id
+        FROM "Product"
+        ORDER BY RANDOM()
+        LIMIT 6
+    `;
+
+    const productIds = randomProducts.map(
+        (product) => product.id
+    );
+
     const products = await prisma.product.findMany({
         where: {
-            name: {
-                in: [
-                    "Logitech G502 Hero",
-                    "Sony WH-CH510",
-                    "AOC 24G2E",
-                    "Razer Huntsman Elite",
-                    "ROG Swift PG259QN",
-                    "JBL Tune 500",
-                ],
+            id: {
+                in: productIds,
             },
         },
         include: {
@@ -30,27 +36,14 @@ export default async function RecommendationSection() {
         },
     });
 
-    // Product order according to Figma.
-    const recommendationOrder = [
-        "Logitech G502 Hero",
-        "Sony WH-CH510",
-        "AOC 24G2E",
-        "Razer Huntsman Elite",
-        "ROG Swift PG259QN",
-        "JBL Tune 500",
-    ];
-
-    // findMany() does not guarantee the order from the "in" array,
-    // so we set the correct order here.
-    const sortedProducts = recommendationOrder
-        .map((name) =>
-            products.find((product) => product.name === name)
+    const selectedProducts = productIds
+        .map((id) =>
+            products.find((product) => product.id === id)
         )
         .filter((product) => product !== undefined);
 
     return (
         <section className="w-full">
-            {/* Section header */}
             <div className="mb-8 flex items-center justify-between">
                 <h2 className="text-2xl font-medium text-white">
                     Recommendation
@@ -64,9 +57,8 @@ export default async function RecommendationSection() {
                 </Link>
             </div>
 
-            {/* Product cards */}
-            <div className="flex gap-8 overflow-x-auto overflow-y-hidden">
-                {sortedProducts.map((product) => (
+            <div className="scrollbar-hide flex gap-8 overflow-x-auto overflow-y-hidden">
+                {selectedProducts.map((product) => (
                     <ProductCard
                         key={product.id}
                         id={product.id}
@@ -75,6 +67,7 @@ export default async function RecommendationSection() {
                         price={product.price.toString()}
                         oldPrice={product.oldPrice?.toString()}
                         imageUrl={product.imageUrl}
+                        stock={product.stock}
                     />
                 ))}
             </div>

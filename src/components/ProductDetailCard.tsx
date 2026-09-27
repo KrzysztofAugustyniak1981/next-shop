@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import CartIcon from "@/components/icons/CartIcon";
+import CheckIcon from "@/components/icons/CheckIcon";
 
 type ProductDetailCardProps = {
     id: number;
@@ -46,7 +47,7 @@ export default function ProductDetailCard({
                         type="button"
                         className="flex h-12 w-12 items-center justify-center rounded-[4px] bg-white text-black"
                     >
-                        ✓
+                        <CheckIcon className="h-4 w-4 text-[#22C55E]" />
                     </button>
 
                     <button

@@ -2,9 +2,11 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
+import CheckIcon from "@/components/icons/CheckIcon";
 import ProductDetailCard from "@/components/ProductDetailCard";
-
+import ProductDescription from "@/components/ProductDescription";
 
 const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL!,
@@ -18,12 +20,40 @@ type ProductDetailsPageProps = {
     }>;
 };
 
+function formatDeliveryDate(date: Date) {
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+    }).format(date);
+}
+
+function getDeliveryRange(productId: number) {
+    const today = new Date();
+
+    const startOffset = (productId % 3) + 1;
+    const endOffset = Math.min(startOffset + 3, 7);
+
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + startOffset);
+
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + endOffset);
+
+    return `${formatDeliveryDate(startDate)} - ${formatDeliveryDate(
+        endDate
+    )}`;
+}
+
 export default async function ProductDetailsPage({
     params,
 }: ProductDetailsPageProps) {
     const { id } = await params;
 
     const productId = Number(id);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+        notFound();
+    }
 
     const product = await prisma.product.findUnique({
         where: {
@@ -39,20 +69,37 @@ export default async function ProductDetailsPage({
         notFound();
     }
 
+    const deliveryRange = getDeliveryRange(product.id);
+
     return (
-        <main className=" bg-[#1A1A1A] text-white">
+        <main className="bg-[#1A1A1A] text-white">
             <div className="mx-auto max-w-[1440px] px-6 pb-16 pt-8 sm:px-8 lg:px-10 lg:pb-10">
-                <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gray-400">Product</span>
+                <nav
+                    aria-label="Breadcrumb"
+                    className="flex items-center gap-4 text-sm"
+                >
+                    <Link
+                        href="/products"
+                        className="text-gray-400 transition-colors hover:text-[#F26B0A]"
+                    >
+                        Product
+                    </Link>
+
                     <span className="text-gray-500">›</span>
-                    <span className="text-white">{product.name}</span>
-                </div>
+
+                    <span className="text-white">
+                        {product.name}
+                    </span>
+                </nav>
 
                 <div className="mt-12 flex flex-col gap-8 lg:flex-row lg:items-start">
                     <div className="w-full lg:w-[422px] lg:shrink-0">
                         <div className="relative h-[320px] w-full overflow-hidden rounded-[6px] border border-[#383B42] bg-white sm:h-[380px] lg:h-[373px]">
                             <Image
-                                src={product.imageUrl || "/images/product-mouse.png"}
+                                src={
+                                    product.imageUrl ||
+                                    "/images/product-mouse.png"
+                                }
                                 alt={product.name}
                                 fill
                                 sizes="(max-width: 1024px) 100vw, 422px"
@@ -71,7 +118,10 @@ export default async function ProductDetailsPage({
                                         }`}
                                 >
                                     <Image
-                                        src={product.imageUrl || "/images/product-mouse.png"}
+                                        src={
+                                            product.imageUrl ||
+                                            "/images/product-mouse.png"
+                                        }
                                         alt={`${product.name} ${thumbnail}`}
                                         fill
                                         sizes="130px"
@@ -94,18 +144,13 @@ export default async function ProductDetailsPage({
                         <p className="mt-6 text-2xl">
                             ${product.price.toString()}
                         </p>
-                        <div className="mt-8">
-                            <p className="text-sm leading-6 text-gray-300">
-                                {product.description || "No description available."}
-                            </p>
 
-                            <button
-                                type="button"
-                                className="mt-1 text-sm text-[#F26B0A]"
-                            >
-                                View More
-                            </button>
-                        </div>
+                        <ProductDescription
+                            description={
+                                product.description ||
+                                "No description available."
+                            }
+                        />
 
                         <div className="mt-8">
                             <p className="text-sm text-gray-400">
@@ -114,7 +159,7 @@ export default async function ProductDetailsPage({
 
                             <div className="mt-3 w-fit rounded-[6px] border border-[#616674] px-4 py-3">
                                 <div className="flex items-start gap-3">
-                                    <span className="text-[#22C55E]">✓</span>
+                                    <CheckIcon className="h-4 w-4 text-[#22C55E]" />
 
                                     <div>
                                         <p className="text-sm text-white">
@@ -122,7 +167,8 @@ export default async function ProductDetailsPage({
                                         </p>
 
                                         <p className="mt-1 text-xs text-gray-400">
-                                            Estimated arrival 30 Sep - 3 Oct
+                                            Estimated arrival{" "}
+                                            {deliveryRange}
                                         </p>
                                     </div>
                                 </div>

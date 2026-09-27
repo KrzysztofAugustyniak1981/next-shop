@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
     const {
@@ -18,8 +18,26 @@ export default function CartPage() {
     );
 
     return (
-        <main className="min-h-screen bg-[#1A1A1A] text-white">
+        <main className="bg-[#1A1A1A] text-white">
             <div className="mx-auto max-w-[1440px] px-4 py-10 md:px-10">
+                <nav
+                    aria-label="Breadcrumb"
+                    className="mb-8 flex items-center gap-2 text-sm"
+                >
+                    <Link
+                        href="/"
+                        className="text-gray-500 transition-colors hover:text-[#F26B0A]"
+                    >
+                        Home
+                    </Link>
+
+                    <span className="text-gray-600">›</span>
+
+                    <span className="text-gray-300">
+                        Shopping Cart
+                    </span>
+                </nav>
+
                 <h1 className="text-2xl font-semibold">
                     Shopping Cart
                 </h1>
@@ -149,6 +167,7 @@ export default function CartPage() {
                             >
                                 Clear Cart
                             </button>
+
                             <Link
                                 href="/checkout"
                                 className="mt-4 block w-full rounded-[6px] bg-[#F29145] px-6 py-4 text-center text-sm font-semibold text-[#1A1A1A]"

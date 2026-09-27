@@ -16,93 +16,199 @@ export type CartItem = {
     stock: number;
 };
 
-type CartContextType = {
-    cartItems: CartItem[];
-    addToCart: (item: CartItem) => void;
-    updateQuantity: (id: number, quantity: number) => void;
-    removeFromCart: (id: number) => void;
-    clearCart: () => void;
+type ApiCartItem = {
+    id: number;
+    quantity: number;
+    product: {
+        id: number;
+        name: string;
+        price: string;
+        imageUrl: string | null;
+        stock: number;
+    };
 };
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+type ApiCart = {
+    items: ApiCartItem[];
+};
+
+type CartContextType = {
+    cartItems: CartItem[];
+    addToCart: (item: CartItem) => Promise<void>;
+    updateQuantity: (
+        id: number,
+        quantity: number
+    ) => Promise<void>;
+    removeFromCart: (id: number) => Promise<void>;
+    clearCart: () => Promise<void>;
+};
+
+const CartContext = createContext<
+    CartContextType | undefined
+>(undefined);
 
 type CartProviderProps = {
     children: React.ReactNode;
 };
 
-export function CartProvider({ children }: CartProviderProps) {
+function convertApiCart(cart: ApiCart): CartItem[] {
+    return cart.items.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: Number(item.product.price),
+        imageUrl: item.product.imageUrl,
+        quantity: item.quantity,
+        stock: item.product.stock,
+    }));
+}
+
+export function CartProvider({
+    children,
+}: CartProviderProps) {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const savedCart = localStorage.getItem("cart");
+        let active = true;
 
-        if (savedCart) {
-            setCartItems(JSON.parse(savedCart));
-        }
+        fetch("/api/cart", {
+            method: "GET",
+            cache: "no-store",
+        })
+            .then(async (response) => {
+                if (response.status === 401) {
+                    return null;
+                }
 
-        setIsLoaded(true);
+                if (!response.ok) {
+                    throw new Error("Failed to load cart.");
+                }
+
+                return (await response.json()) as ApiCart;
+            })
+            .then((cart) => {
+                if (active && cart) {
+                    setCartItems(convertApiCart(cart));
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load cart:", error);
+            });
+
+        return () => {
+            active = false;
+        };
     }, []);
 
-    useEffect(() => {
-        if (!isLoaded) {
-            return;
-        }
+    async function addToCart(item: CartItem) {
+        try {
+            const response = await fetch("/api/cart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    productId: item.id,
+                    quantity: item.quantity,
+                }),
+            });
 
-        localStorage.setItem(
-            "cart",
-            JSON.stringify(cartItems)
-        );
-    }, [cartItems, isLoaded]);
-
-    function addToCart(item: CartItem) {
-        setCartItems((previousItems) => {
-            const existingItem = previousItems.find(
-                (cartItem) => cartItem.id === item.id
-            );
-
-            if (existingItem) {
-                return previousItems.map((cartItem) =>
-                    cartItem.id === item.id
-                        ? {
-                            ...cartItem,
-                            quantity: Math.min(
-                                cartItem.quantity + item.quantity,
-                                cartItem.stock
-                            ),
-                        }
-                        : cartItem
-                );
+            if (!response.ok) {
+                console.error("Failed to add product to cart.");
+                return;
             }
 
-            return [...previousItems, item];
-        });
+            const cart: ApiCart = await response.json();
+
+            setCartItems(convertApiCart(cart));
+        } catch (error) {
+            console.error(
+                "Failed to add product to cart:",
+                error
+            );
+        }
     }
 
-    function updateQuantity(id: number, quantity: number) {
-        setCartItems((previousItems) =>
-            previousItems.map((item) =>
-                item.id === id
-                    ? {
-                        ...item,
-                        quantity: Math.max(
-                            1,
-                            Math.min(quantity, item.stock)
-                        ),
-                    }
-                    : item
-            )
-        );
+    async function updateQuantity(
+        id: number,
+        quantity: number
+    ) {
+        try {
+            const response = await fetch("/api/cart", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    productId: id,
+                    quantity,
+                }),
+            });
+
+            if (!response.ok) {
+                console.error("Failed to update cart.");
+                return;
+            }
+
+            const cart: ApiCart = await response.json();
+
+            setCartItems(convertApiCart(cart));
+        } catch (error) {
+            console.error(
+                "Failed to update cart:",
+                error
+            );
+        }
     }
 
-    function removeFromCart(id: number) {
-        setCartItems((previousItems) =>
-            previousItems.filter((item) => item.id !== id)
-        );
+    async function removeFromCart(id: number) {
+        try {
+            const response = await fetch("/api/cart", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    productId: id,
+                }),
+            });
+
+            if (!response.ok) {
+                console.error("Failed to remove product.");
+                return;
+            }
+
+            const cart: ApiCart = await response.json();
+
+            setCartItems(convertApiCart(cart));
+        } catch (error) {
+            console.error(
+                "Failed to remove product from cart:",
+                error
+            );
+        }
     }
 
-    function clearCart() {
-    setCartItems([]);
+    async function clearCart() {
+        try {
+            const response = await fetch("/api/cart", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({}),
+            });
+
+            if (!response.ok) {
+                console.error("Failed to clear cart.");
+                return;
+            }
+
+            const cart: ApiCart = await response.json();
+
+            setCartItems(convertApiCart(cart));
+        } catch (error) {
+            console.error("Failed to clear cart:", error);
+        }
     }
 
     return (
@@ -118,14 +224,15 @@ export function CartProvider({ children }: CartProviderProps) {
             {children}
         </CartContext.Provider>
     );
-
 }
 
 export function useCart() {
     const context = useContext(CartContext);
 
     if (context === undefined) {
-        throw new Error("useCart must be used within a CartProvider");
+        throw new Error(
+            "useCart must be used within a CartProvider"
+        );
     }
 
     return context;

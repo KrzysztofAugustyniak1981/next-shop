@@ -6,6 +6,7 @@ import { redirect, notFound } from "next/navigation";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { verifySessionToken } from "@/lib/auth";
+import CheckIcon from "@/components/icons/CheckIcon";
 
 const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL!,
@@ -70,7 +71,7 @@ export default async function OrderSuccessPage({
         (sum, item) =>
             sum +
             Number(item.priceAtPurchase) *
-                item.quantity,
+            item.quantity,
         0
     );
 
@@ -85,11 +86,11 @@ export default async function OrderSuccessPage({
         });
 
     return (
-        <main className="min-h-screen bg-[#1A1A1A] px-4 py-12 text-white">
+        <main className="bg-[#1A1A1A] px-4 py-12 text-white">
             <div className="mx-auto w-full max-w-[640px] rounded-[6px] border border-[#383B42] bg-[#262626] p-6">
                 <div className="flex flex-col items-center text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-400 text-3xl text-green-400">
-                        ✓
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-400 text-green-400">
+                        <CheckIcon className="h-7 w-7" />
                     </div>
 
                     <h1 className="mt-6 text-xl font-semibold">

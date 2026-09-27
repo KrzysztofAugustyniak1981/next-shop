@@ -13,6 +13,7 @@ export default function BrandCard({
 }: BrandCardProps) {
     return (
         <div className="flex h-[190px] w-[220px] shrink-0 flex-col items-center justify-center gap-7 rounded-[6px] border border-[#616674] bg-[#262626] p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
                 src={image}
                 alt={`${name} logo`}
