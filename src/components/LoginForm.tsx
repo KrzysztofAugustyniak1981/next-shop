@@ -16,6 +16,7 @@ export default function LoginForm() {
     const [step, setStep] = useState<1 | 2>(1);
     const [showPassword, setShowPassword] = useState(false);
     const [serverError, setServerError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const { login } = useAuth();
     const router = useRouter();
@@ -38,11 +39,13 @@ export default function LoginForm() {
 
         if (emailIsValid) {
             setStep(2);
+            setServerError("");
         }
     }
 
     async function onSubmit(data: LoginFormData) {
         setServerError("");
+        setSuccessMessage("");
 
         try {
             const response = await fetch("/api/auth/login", {
@@ -70,7 +73,11 @@ export default function LoginForm() {
                 email: responseData.email,
             });
 
-            router.push("/");
+            setSuccessMessage("You have been successfully signed in.");
+
+            setTimeout(() => {
+                router.push("/");
+            }, 1000);
         } catch {
             setServerError("Something went wrong. Please try again.");
         }
@@ -206,16 +213,28 @@ export default function LoginForm() {
 
                         <button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || Boolean(successMessage)}
                             className="mt-8 h-[54px] w-full rounded-[6px] bg-[#F29145] text-sm text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isSubmitting ? "Signing in..." : "Sign In"}
                         </button>
 
                         {serverError && (
-                            <p className="mt-4 text-sm text-red-400">
+                            <div
+                                role="alert"
+                                className="mt-4 rounded-[6px] border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+                            >
                                 {serverError}
-                            </p>
+                            </div>
+                        )}
+
+                        {successMessage && (
+                            <div
+                                role="status"
+                                className="mt-4 rounded-[6px] border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-400"
+                            >
+                                {successMessage}
+                            </div>
                         )}
                     </>
                 )}

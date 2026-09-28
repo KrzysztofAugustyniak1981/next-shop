@@ -27,11 +27,18 @@ function formatDeliveryDate(date: Date) {
     }).format(date);
 }
 
-function getDeliveryRange(productId: number) {
+function getDeliveryRange() {
     const today = new Date();
 
-    const startOffset = (productId % 3) + 1;
-    const endOffset = Math.min(startOffset + 3, 7);
+    const startOffset = Math.floor(Math.random() * 3) + 1;
+
+    const maxEndOffset = 7;
+    const minEndOffset = startOffset + 1;
+
+    const endOffset =
+        Math.floor(
+            Math.random() * (maxEndOffset - minEndOffset + 1)
+        ) + minEndOffset;
 
     const startDate = new Date(today);
     startDate.setDate(today.getDate() + startOffset);
@@ -69,7 +76,7 @@ export default async function ProductDetailsPage({
         notFound();
     }
 
-    const deliveryRange = getDeliveryRange(product.id);
+    const deliveryRange = getDeliveryRange();
 
     return (
         <main className="bg-[#1A1A1A] text-white">
@@ -112,10 +119,11 @@ export default async function ProductDetailsPage({
                             {[1, 2, 3].map((thumbnail) => (
                                 <div
                                     key={thumbnail}
-                                    className={`relative h-[99px] flex-1 overflow-hidden rounded-[4px] bg-white ${thumbnail === 1
-                                        ? "border-2 border-[#F26B0A]"
-                                        : "border border-[#383B42]"
-                                        }`}
+                                    className={`relative h-[99px] flex-1 overflow-hidden rounded-[4px] bg-white ${
+                                        thumbnail === 1
+                                            ? "border-2 border-[#F26B0A]"
+                                            : "border border-[#383B42]"
+                                    }`}
                                 >
                                     <Image
                                         src={
